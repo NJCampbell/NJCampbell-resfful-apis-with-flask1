@@ -91,13 +91,3 @@ class Vehicles(db.Model):
             "crew": self.crew,
             "passengers": self.passengers
         }
-
-
-# class People(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-
-# class Planets(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-
-# class Vehicles(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
