@@ -120,8 +120,10 @@ def handle_user_faves():
     else:
         return jsonify(data=[user_faves.serialize() for user_faves in user_faves]), 200
 
+# this method is returning 400
 
-@app.route('/favorites/planets/<int:planet_id>', methods=['POST'])
+
+@app.route('/user/<int:user_id>/favorites/planets/<int:planet_id>', methods=['POST'])
 def create_fave_planet(planet_id):
     body = request.get_json(planet_id)
     if body is None:
@@ -131,7 +133,7 @@ def create_fave_planet(planet_id):
     return 'ok', 200
 
 
-@app.route('/favorites/planets/<int:planet_id>', methods=['DELETE'])
+@app.route('/user/<int:user_id>/favorites/planets/<int:planet_id>', methods=['DELETE'])
 def remove_fave_planet():
     body = request.get_json()
     if body is None:
@@ -140,37 +142,27 @@ def remove_fave_planet():
         return 'You need to select a planet', 400
     return 'ok', 200
 
+# this method is returning 500
+
 
 @app.route('/favorites/people/<int:person_id>', methods=['POST'])
 def create_fave_person():
+    favorites = User_Favorites.query.all()
     body = request.get_json()
-    if body is None:
-        return 'The request body is null', 400
-    if 'person_id' not in body:
-        return 'You need to select a person', 400
-    return 'ok', 200
+    print("Incoming request with the following body", body)
+    favorites.append(body)
+    return jsonify(favorites)
 
 
-@app.route('/favorites/people/<int:person_id>', methods=['DELETE'])
-def remove_fave_person():
-    body = request.get_json()
-    if body is None:
-        return 'The request body is null', 400
-    if 'person_id' not in body:
-        return 'You need to select a person', 400
-    return 'ok', 200
+@app.route('/user/<int:user_id>/favorites/people/<int:person_id>', methods=['DELETE'])
+def remove_fave_person(position):
+    person = request.get_json()
+    print("This is the position to delete: ", position)
+    del person[position]
+    return jsonify(person)
 
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)
-
-# @app.route('/user', methods=['GET'])
-# def handle_hello():
-
-#     response_body = {
-#         "msg": "Hello, this is your GET /user response "
-#     }
-
-#     return jsonify(response_body), 200
