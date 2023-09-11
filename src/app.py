@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, People, Planets, Vehicles, User_Favorites
+from models import db, User, People, Planets, Vehicles, Favorites
+import json
 # from models import Person
 
 app = Flask(__name__)
@@ -96,7 +97,7 @@ def get_single_vehicle(vehicle_id):
     return 'Vehicle not found', 404
 
 
-@app.route('/user', methods=['GET'])
+@app.route('/users', methods=['GET'])
 def handle_users():
     user = User.query.all()
     if user is None:
@@ -105,61 +106,55 @@ def handle_users():
         return jsonify(data=[user.serialize() for user in user]), 200
 
 
-@app.route('/user/<int:user_id>', methods=['PUT', 'GET'])
-def get_single_user(user_id):
+@app.route('/users/favorites', methods=['GET'])
+def get_user_favorites():
+    user_favorites = Favorites.query.all()
     if request.method == 'GET':
-        user1 = User.query.get(user_id)
-        return jsonify(user1.serialize()), 200
+        if user_favorites is None:
+            return jsonify({'message': 'No favorites found'}), 404
+        else:
+            return jsonify(data=[user_favorites.serialize() for user_favorites in user_favorites]), 200
 
 
-@app.route('/user/favorites', methods=['GET'])
-def handle_user_faves():
-    user_faves = User_Favorites.query.all()
-    if user_faves is None:
-        return jsonify(msg='No favorites found')
-    else:
-        return jsonify(data=[user_faves.serialize() for user_faves in user_faves]), 200
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+def add_favorite_planet():
 
-# this method is returning 400
+    data = request.get_json()
 
+    new_favorite_planet = Favorites(planet_id=data.planet_id)
 
-@app.route('/user/<int:user_id>/favorites/planets/<int:planet_id>', methods=['POST'])
-def create_fave_planet(planet_id):
-    body = request.get_json(planet_id)
-    if body is None:
-        return 'The request body is null', 400
-    if 'planet_id' not in body:
-        return 'You need to select a planet', 400
-    return 'ok', 200
+    db.session.add(new_favorite_planet)
+    db.session.commit()
+
+    return jsonify(new_favorite_planet.serialize()), 200
 
 
-@app.route('/user/<int:user_id>/favorites/planets/<int:planet_id>', methods=['DELETE'])
-def remove_fave_planet():
-    body = request.get_json()
-    if body is None:
-        return 'The request body is null', 400
-    if 'planet_id' not in body:
-        return 'You need to select a planet', 400
-    return 'ok', 200
+@app.route('/favorite/people/<int:person_id>', methods=['POST'])
+def add_favorite_people():
+    data = request.get_json()
+    new_favorite_person = Favorites(person_id=data.person_id)
+    db.session.add(new_favorite_person)
+    db.session.commit()
 
-# this method is returning 500
+    return jsonify(new_favorite_person.serialize()), 200
 
 
-@app.route('/favorites/people/<int:person_id>', methods=['POST'])
-def create_fave_person():
-    favorites = User_Favorites.query.all()
-    body = request.get_json()
-    print("Incoming request with the following body", body)
-    favorites.append(body)
-    return jsonify(favorites)
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def delete_favorite_planet(planet_id):
+    favorite_planet_to_delete = Favorites.query.get(planet_id)
+    db.session.delete(favorite_planet_to_delete)
+    db.session.commit()
+
+    return jsonify({'message': 'Favorite successfully deleted.'}), 200
 
 
-@app.route('/user/<int:user_id>/favorites/people/<int:person_id>', methods=['DELETE'])
-def remove_fave_person(position):
-    person = request.get_json()
-    print("This is the position to delete: ", position)
-    del person[position]
-    return jsonify(person)
+@app.route('/favorite/people/<int:person_id>', methods=['DELETE'])
+def delete_favorite_people(person_id):
+    favorite_person_to_delete = Favorites.query.get(person_id)
+    db.session.delete(favorite_person_to_delete)
+    db.session.commit()
+
+    return jsonify({'message': 'Favorite successfully deleted.'}), 200
 
 
 # this only runs if `$ python src/app.py` is executed

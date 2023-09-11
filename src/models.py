@@ -23,14 +23,14 @@ class User(db.Model):
 class Planets(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     planet_name = db.Column(db.String(50), nullable=False)
-    diameter = db.Column(db.String(30), nullable=False)
-    rotation_period = db.Column(db.String(30), nullable=False)
-    orbital_period = db.Column(db.String(30), nullable=False)
-    gravity = db.Column(db.String(30), nullable=False)
-    population = db.Column(db.String(30), nullable=False)
-    climate = db.Column(db.String(30), nullable=False)
-    terrain = db.Column(db.String(30), nullable=True)
-    description = db.Column(db.String(30), nullable=True)
+    diameter = db.Column(db.String(50), nullable=False)
+    rotation_period = db.Column(db.String(50), nullable=False)
+    orbital_period = db.Column(db.String(50), nullable=False)
+    gravity = db.Column(db.String(50), nullable=False)
+    population = db.Column(db.String(50), nullable=False)
+    climate = db.Column(db.String(50), nullable=False)
+    terrain = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
 
     def serialize(self):
         return {
@@ -67,7 +67,8 @@ class Vehicles(db.Model):
             "cost_in_credits": self.cost_in_credits,
             "length": self.length,
             "crew": self.crew,
-            "passengers": self.passengers
+            "passengers": self.passengers,
+
         }
 
 
@@ -87,7 +88,8 @@ class People(db.Model):
 
     def serialize(self):
         return {
-            "a_name": self.persons_name,
+            "id": self.id,
+            "a_persons_name": self.persons_name,
             "height": self.height,
             "mass": self.mass,
             "hair_color": self.hair_color,
@@ -99,11 +101,15 @@ class People(db.Model):
         }
 
 
-class User_Favorites(db.Model):
+class Favorites(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    people_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    person_id = db.Column(db.Integer, db.ForeignKey('people.id'))
+    # persons_name = db.Column(db.String(50), nullable=True)
     planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
+    # planet_name = db.Column(db.String(50), nullable=True)
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
+    # vehicle_name = db.Column(db.String(50), nullable=True)
     people = db.relationship(People)
     planet = db.relationship(Planets)
     vehicle = db.relationship(Vehicles)
@@ -111,7 +117,11 @@ class User_Favorites(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "people_id": self.people_id,
+            # "persons_name": self.persons_name,
+            # "planet_name": self.planet_name,
+            # "vehicle_name": self.vehicle_name,
+            "user_id": self.user_id,
+            "person_id": self.person_id,
             "planet_id": self.planet_id,
             "vehicle_id": self.vehicle_id,
         }
