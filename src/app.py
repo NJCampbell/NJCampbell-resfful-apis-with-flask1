@@ -116,27 +116,26 @@ def get_user_favorites():
             return jsonify(data=[user_favorites.serialize() for user_favorites in user_favorites]), 200
 
 
-@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+@app.route('/favorite/planet/', methods=['POST'])
 def add_favorite_planet():
 
     data = request.get_json()
-
     new_favorite_planet = Favorites(planet_id=data.planet_id)
-
-    db.session.add(new_favorite_planet)
-    db.session.commit()
+    if request.method == 'POST':
+        db.session.add(new_favorite_planet)
+        db.session.commit()
 
     return jsonify(new_favorite_planet.serialize()), 200
 
 
-@app.route('/favorite/people/<int:person_id>', methods=['POST'])
+@app.route('/favorite/people/', methods=['POST'])
 def add_favorite_people():
     data = request.get_json()
-    new_favorite_person = Favorites(person_id=data.person_id)
+    new_favorite_person = People(person_id=data["person_id"])
     db.session.add(new_favorite_person)
     db.session.commit()
 
-    return jsonify(new_favorite_person.serialize()), 200
+    return jsonify(data), 200
 
 
 @app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
